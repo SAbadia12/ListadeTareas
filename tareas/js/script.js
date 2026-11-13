@@ -39,6 +39,91 @@ function updateSummary() {
     taskProgress.setAttribute('aria-valuetext', `${completedCount} de ${totalCount} tareas completadas`)
 }
 
+function createActionButton(label, className, action) {
+    const button = document.createElement('button')
+    button.className = className
+    button.type = 'button'
+    button.textContent = label
+    button.addEventListener('click', action)
+    return button
+}
+
+function createTaskEditor(todo, item) {
+    const form = document.createElement('form')
+    const titleLabel = document.createElement('label')
+    const titleInput = document.createElement('input')
+    const stepsLabel = document.createElement('label')
+    const stepsInput = document.createElement('textarea')
+    const dateLabel = document.createElement('label')
+    const dateInput = document.createElement('input')
+    const buttons = document.createElement('div')
+
+    form.className = 'task-editor'
+
+    titleLabel.textContent = 'Nombre de la tarea'
+    titleInput.type = 'text'
+    titleInput.maxLength = 120
+    titleInput.required = true
+    titleInput.value = todo.title
+    titleLabel.append(titleInput)
+
+    stepsLabel.textContent = 'Pasos (uno por línea)'
+    stepsInput.maxLength = 500
+    stepsInput.rows = 3
+    stepsInput.value = todo.steps.map((step) => step.title).join('\n')
+    stepsLabel.append(stepsInput)
+
+    dateLabel.textContent = 'Fecha límite'
+    dateInput.type = 'date'
+    dateInput.value = todo.dueDate
+    dateLabel.append(dateInput)
+
+    buttons.className = 'task-editor-actions'
+    buttons.append(
+        createActionButton('Guardar', 'task-action task-save-button', () => form.requestSubmit()),
+        createActionButton('Cancelar', 'task-action', () => {
+            renderTasks()
+            todoList.querySelector(`[data-task-index="${todos.indexOf(todo)}"] .task-edit-button`)?.focus()
+        })
+    )
+
+    form.append(titleLabel, stepsLabel, dateLabel, buttons)
+    form.addEventListener('submit', (event) => {
+        event.preventDefault()
+
+        const title = titleInput.value.trim()
+        if (!title) {
+            titleInput.focus()
+            return
+        }
+
+        const previousSteps = [...todo.steps]
+        const updatedSteps = stepsInput.value
+            .split(/\r?\n/)
+            .map((step) => step.trim())
+            .filter((step) => step.length > 0)
+            .map((stepTitle) => {
+                const previousIndex = previousSteps.findIndex((step) => step.title === stepTitle)
+                const previousStep = previousIndex === -1 ? null : previousSteps.splice(previousIndex, 1)[0]
+                return { title: stepTitle, completed: previousStep?.completed ?? false }
+            })
+
+        todo.title = title
+        todo.dueDate = dateInput.value
+        todo.steps = updatedSteps
+        if (updatedSteps.length > 0) {
+            todo.completed = updatedSteps.every((step) => step.completed)
+        }
+
+        renderTasks()
+        const taskIndex = todos.indexOf(todo)
+        todoList.querySelector(`[data-task-index="${taskIndex}"] .task-edit-button`)?.focus()
+    })
+
+    item.querySelector('.task-content').replaceChildren(form)
+    titleInput.focus()
+}
+
 function createTaskElement(todo) {
     const item = document.createElement('li')
     const checkbox = document.createElement('input')
@@ -46,11 +131,30 @@ function createTaskElement(todo) {
     const title = document.createElement('span')
     const status = document.createElement('span')
 
+    const taskIndex = todos.indexOf(todo)
+    const actions = document.createElement('div')
     item.className = 'task-row'
+    item.dataset.taskIndex = taskIndex
     checkbox.className = 'task-checkbox'
     checkbox.type = 'checkbox'
     checkbox.checked = todo.completed
     checkbox.setAttribute('aria-label', `Marcar "${todo.title}" como completada`)
+    actions.className = 'task-actions'
+    actions.append(
+        createActionButton('Editar', 'task-action task-edit-button', () => createTaskEditor(todo, item)),
+        createActionButton('Eliminar', 'task-action task-delete-button', () => {
+            if (window.confirm(`¿Eliminar la tarea "${todo.title}"?`)) {
+                todos.splice(todos.indexOf(todo), 1)
+                renderTasks()
+                const nextTask = todoList.querySelector(`[data-task-index="${Math.min(taskIndex, todos.length - 1)}"] .task-edit-button`)
+                if (nextTask) {
+                    nextTask.focus()
+                } else {
+                    titleInput.focus()
+                }
+            }
+        })
+    )
 
     content.className = 'task-content'
     title.className = 'task-title'
@@ -119,7 +223,7 @@ function createTaskElement(todo) {
         updateSummary()
     })
 
-    item.append(checkbox, content, status)
+    item.append(checkbox, content, status, actions)
     updateTaskCompletion(todo, item, checkbox, status, stepCheckboxes)
     return item
 }
