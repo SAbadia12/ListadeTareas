@@ -1,0 +1,712 @@
+:root {
+    color-scheme: light;
+    --ink: #122a55;
+    --muted: #78839a;
+    --blue: #526ff2;
+    --blue-dark: #3654dc;
+    --blue-soft: #eef1ff;
+    --gold: #f0ad27;
+    --paper: #ffffff;
+    --line: #e9edf4;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    padding: 38px 24px;
+    color: var(--ink);
+    background:
+        radial-gradient(circle at 8% 12%, rgba(255, 255, 255, 0.48) 0 2px, transparent 3px),
+        radial-gradient(circle at 93% 82%, rgba(255, 255, 255, 0.45) 0 3px, transparent 4px),
+        #f5c96b;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button,
+a,
+input {
+    -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+    position: relative;
+    width: min(1080px, 100%);
+    margin: 0 auto;
+    padding: 34px 46px 38px;
+    overflow: hidden;
+    background: var(--paper);
+    border: 1px solid rgba(18, 42, 85, 0.06);
+    border-radius: 26px;
+    box-shadow: 0 24px 70px rgba(79, 65, 36, 0.16);
+}
+
+.topbar,
+.brand,
+.topbar-note,
+.workspace,
+.tasks-heading,
+.form-bottom,
+.progress-label,
+.task-row,
+.panel-footer {
+    display: flex;
+    align-items: center;
+}
+
+.topbar,
+.tasks-heading,
+.progress-label {
+    justify-content: space-between;
+}
+
+.brand {
+    gap: 10px;
+    color: var(--ink);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-decoration: none;
+}
+
+.brand-mark {
+    display: grid;
+    width: 31px;
+    height: 31px;
+    place-items: center;
+    color: white;
+    background: var(--blue);
+    border-radius: 10px 10px 10px 3px;
+    font-size: 16px;
+}
+
+.topbar-note {
+    gap: 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #64c89c;
+    border-radius: 50%;
+}
+
+.page-intro {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin: 56px 0 34px;
+}
+
+.eyebrow {
+    margin: 0 0 9px;
+    color: var(--blue);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+}
+
+h1,
+h2,
+p {
+    margin-top: 0;
+}
+
+h1,
+h2 {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+h1 {
+    margin-bottom: 12px;
+    font-size: clamp(32px, 4vw, 46px);
+    font-weight: 800;
+    letter-spacing: -2.3px;
+    line-height: 1.08;
+}
+
+h1 span {
+    color: var(--gold);
+}
+
+.intro-copy {
+    margin-bottom: 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.date-stamp {
+    display: grid;
+    width: 76px;
+    height: 76px;
+    flex: 0 0 auto;
+    align-content: center;
+    justify-items: center;
+    margin-left: 20px;
+    background: #fff7e6;
+    border: 1px solid #f8e6bf;
+    border-radius: 18px;
+    transform: rotate(4deg);
+}
+
+.date-stamp-day {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.date-stamp-month {
+    margin-top: 5px;
+    color: #b08125;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.workspace {
+    align-items: stretch;
+    gap: 25px;
+}
+
+.inspiration-panel {
+    position: relative;
+    display: flex;
+    width: 38%;
+    min-width: 0;
+    flex-direction: column;
+    padding: 17px;
+    overflow: hidden;
+    background: #eff2ff;
+    border-radius: 20px;
+}
+
+.art-frame {
+    position: relative;
+    height: 340px;
+    overflow: hidden;
+    background: #ffd77d;
+    border-radius: 14px;
+}
+
+.art-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.art-caption {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    padding: 10px 12px;
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.91);
+    border-radius: 10px;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.inspiration-copy {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 18px 5px 5px;
+}
+
+.inspiration-copy p {
+    max-width: 225px;
+    margin: 0;
+    color: #53628a;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.sparkle {
+    color: var(--gold);
+    font-size: 19px;
+    line-height: 1;
+}
+
+.side-decoration {
+    position: absolute;
+    right: -17px;
+    bottom: 12px;
+    color: rgba(82, 111, 242, 0.12);
+    font-size: 100px;
+    line-height: 1;
+}
+
+.tasks-panel {
+    min-width: 0;
+    flex: 1;
+    padding: 25px 27px 19px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+}
+
+.tasks-heading {
+    margin-bottom: 20px;
+}
+
+.tasks-heading .eyebrow {
+    margin-bottom: 4px;
+}
+
+h2 {
+    margin-bottom: 0;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+}
+
+.task-count {
+    padding: 7px 11px;
+    color: var(--blue-dark);
+    background: var(--blue-soft);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.task-form {
+    padding: 14px;
+    background: #f8f9fc;
+    border: 1px solid #edf0f6;
+    border-radius: 14px;
+}
+
+.task-form > input {
+    width: 100%;
+    min-height: 38px;
+    padding: 5px 7px 10px;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid #e6eaf2;
+    outline: none;
+    font-size: 13px;
+}
+
+.task-form > input::placeholder {
+    color: #9ba4b5;
+}
+
+.task-form > input:focus {
+    border-bottom-color: var(--blue);
+}
+
+.form-bottom {
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 12px;
+}
+
+.date-field {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 7px;
+    color: var(--blue);
+}
+
+.date-field > span:first-child {
+    font-size: 19px;
+}
+
+.date-field input {
+    width: 128px;
+    min-width: 0;
+    padding: 6px 0;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    outline: none;
+    font-size: 11px;
+}
+
+.date-field input:focus {
+    color: var(--ink);
+}
+
+.add-button {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 13px;
+    color: white;
+    background: var(--blue);
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    transition: background 160ms ease, transform 160ms ease;
+}
+
+.add-button span {
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1;
+}
+
+.add-button:hover {
+    background: var(--blue-dark);
+    transform: translateY(-1px);
+}
+
+.add-button:focus-visible,
+.task-checkbox:focus-visible {
+    outline: 3px solid rgba(82, 111, 242, 0.35);
+    outline-offset: 3px;
+}
+
+.form-message {
+    min-height: 0;
+    margin: 0;
+    color: #b94b4b;
+    font-size: 11px;
+}
+
+.form-message:not(:empty) {
+    padding-top: 8px;
+}
+
+.progress-section {
+    margin: 24px 0 17px;
+}
+
+.progress-label {
+    margin-bottom: 9px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.progress-label span:first-child {
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.progress-label span:last-child {
+    font-weight: 600;
+}
+
+.progress-section progress {
+    display: block;
+    width: 100%;
+    height: 7px;
+    overflow: hidden;
+    appearance: none;
+    background: #edf0f6;
+    border: 0;
+    border-radius: 10px;
+}
+
+.progress-section progress::-webkit-progress-bar {
+    background: #edf0f6;
+    border-radius: 10px;
+}
+
+.progress-section progress::-webkit-progress-value {
+    background: linear-gradient(90deg, #7188ff, #526ff2);
+    border-radius: 10px;
+    transition: width 180ms ease;
+}
+
+.progress-section progress::-moz-progress-bar {
+    background: linear-gradient(90deg, #7188ff, #526ff2);
+    border-radius: 10px;
+}
+
+.task-list {
+    display: grid;
+    gap: 9px;
+    max-height: 335px;
+    margin: 0;
+    padding: 0 3px 0 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.task-row {
+    min-height: 57px;
+    gap: 12px;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    animation: arrive 220ms ease both;
+}
+
+.task-checkbox {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    margin: 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+}
+
+.task-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.task-title {
+    display: block;
+    overflow-wrap: anywhere;
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.task-date {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.task-status {
+    flex: 0 0 auto;
+    padding: 5px 8px;
+    color: #9a6b0c;
+    background: #fff5dc;
+    border-radius: 20px;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.task-row.is-complete {
+    background: #fafbff;
+}
+
+.task-row.is-complete .task-title {
+    color: #9aa3b3;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+.task-row.is-complete .task-status {
+    color: #317b5d;
+    background: #e9f7ef;
+}
+
+.empty-state {
+    display: flex;
+    min-height: 170px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: var(--muted);
+    background: #fbfcff;
+    border: 1px dashed #dce2f0;
+    border-radius: 13px;
+    text-align: center;
+}
+
+.empty-icon {
+    margin-bottom: 9px;
+    color: var(--gold);
+    font-size: 24px;
+}
+
+.empty-state strong {
+    margin-bottom: 5px;
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px;
+}
+
+.empty-state > span:last-child {
+    max-width: 230px;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.panel-footer {
+    justify-content: center;
+    gap: 6px;
+    margin: 18px 0 0;
+    color: #909aae;
+    font-size: 10px;
+}
+
+.panel-footer span {
+    color: var(--gold);
+    font-size: 15px;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@keyframes arrive {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 760px) {
+    body {
+        padding: 18px 14px;
+    }
+
+    .app-shell {
+        padding: 26px 24px;
+        border-radius: 22px;
+    }
+
+    .page-intro {
+        margin: 43px 0 27px;
+    }
+
+    .workspace {
+        flex-direction: column;
+    }
+
+    .inspiration-panel {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+    }
+
+    .art-frame {
+        width: 42%;
+        height: 145px;
+        flex: 0 0 auto;
+    }
+
+    .art-caption {
+        right: 7px;
+        bottom: 7px;
+        left: 7px;
+        padding: 7px 4px;
+        font-size: 9px;
+    }
+
+    .inspiration-copy {
+        padding: 12px 4px;
+    }
+
+    .inspiration-copy p {
+        font-size: 12px;
+    }
+
+    .tasks-panel {
+        padding: 22px;
+    }
+}
+
+@media (max-width: 460px) {
+    .app-shell {
+        padding: 22px 16px;
+    }
+
+    .topbar-note {
+        font-size: 10px;
+    }
+
+    .page-intro {
+        margin-top: 38px;
+    }
+
+    h1 {
+        font-size: 34px;
+    }
+
+    .intro-copy {
+        max-width: 250px;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .date-stamp {
+        width: 62px;
+        height: 62px;
+    }
+
+    .date-stamp-day {
+        font-size: 22px;
+    }
+
+    .tasks-panel {
+        padding: 18px 15px;
+    }
+
+    .task-form {
+        padding: 11px;
+    }
+
+    .date-field {
+        gap: 4px;
+    }
+
+    .date-field input {
+        width: 112px;
+        font-size: 10px;
+    }
+
+    .add-button {
+        padding: 0 10px;
+        font-size: 10px;
+    }
+
+    .task-status {
+        padding: 5px 6px;
+        font-size: 8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

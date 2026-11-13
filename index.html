@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5c96b">
+    <title>Mi semana | Lista de tareas</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/script.js" defer></script>
+</head>
+<body>
+    <main class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="#" aria-label="Mi semana, inicio">
+                <span class="brand-mark" aria-hidden="true">M</span>
+                <span>mi semana</span>
+            </a>
+        </header>
+
+        <section class="page-intro" aria-labelledby="page-title">
+            <div>
+                <p class="eyebrow">TU ESPACIO PARA ORGANIZARTE</p>
+                <h1 id="page-title">Haz espacio para<br>lo importante<span>.</span></h1>
+                <p class="intro-copy">Anota tus pendientes y celebra cada pequeño avance.</p>
+            </div>
+            <div class="date-stamp" aria-label="Fecha de hoy">
+                <span class="date-stamp-day" id="today-day"></span>
+                <span class="date-stamp-month" id="today-month"></span>
+            </div>
+        </section>
+
+        <div class="workspace">
+            <aside class="inspiration-panel" aria-label="Inspiración para planificar">
+                <div class="art-frame">
+                    <img src="img/img.png" alt="Ilustración de un planificador semanal en tonos azules y amarillos">
+                    <span class="art-caption">Planifica a tu manera</span>
+                </div>
+                <div class="inspiration-copy">
+                    <span class="sparkle" aria-hidden="true">✦</span>
+                    <p>Los grandes logros empiezan con una tarea pequeña.</p>
+                </div>
+                <div class="side-decoration" aria-hidden="true">✳</div>
+            </aside>
+
+            <section class="tasks-panel" aria-labelledby="tasks-title">
+                <div class="tasks-heading">
+                    <div>
+                        <p class="eyebrow">TU LISTA</p>
+                        <h2 id="tasks-title">Pendientes</h2>
+                    </div>
+                    <span class="task-count" id="task-count" aria-live="polite">0 tareas</span>
+                </div>
+
+                <form class="task-form" id="task-form">
+                    <label class="sr-only" for="todo-title">Nombre de la tarea</label>
+                    <input
+                        id="todo-title"
+                        name="title"
+                        type="text"
+                        placeholder="¿Qué necesitas hacer?"
+                        maxlength="120"
+                        autocomplete="off"
+                        required
+                    >
+                    <div class="form-bottom">
+                        <label class="date-field" for="date-picker">
+                            <span class="sr-only">Fecha límite (opcional)</span>
+                            <input id="date-picker" name="dueDate" type="date" aria-label="Fecha límite opcional">
+                        </label>
+                        <button class="add-button" type="submit">
+                            <span aria-hidden="true">+</span> Agregar tarea
+                        </button>
+                    </div>
+                    <p class="form-message" id="form-message" aria-live="polite"></p>
+                </form>
+
+                <div class="progress-section">
+                    <div class="progress-label">
+                        <span>Tu progreso</span>
+                        <span id="progress-text">0 de 0 completadas</span>
+                    </div>
+                    <progress id="task-progress" value="0" max="1" aria-label="Progreso de tareas completadas">0%</progress>
+                </div>
+
+                <ul class="task-list" id="todo-list" aria-live="polite" aria-label="Tareas pendientes">
+                    <li class="empty-state" id="empty-state">
+                        <span class="empty-icon" aria-hidden="true">✦</span>
+                        <strong>Tu lista está lista para empezar</strong>
+                        <span>Agrega una tarea y aquí aparecerá tu primer paso.</span>
+                    </li>
+                </ul>
+
+                <p class="panel-footer"><span aria-hidden="true">✧</span> Cada tarea completada cuenta.</p>
+            </section>
+        </div>
+    </main>
+</body>
+</html>
