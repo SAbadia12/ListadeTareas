@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f2ba3d">
+    <title>Contactos | Mi semana</title>
+    <link rel="stylesheet" href="css/contactos.css">
+    <script src="js/contactos.js" defer></script>
+</head>
+<body>
+    <main class="contacts-app">
+        <header class="contacts-header">
+            <a class="back-link" href="index.html">← Volver a mis tareas</a>
+            <h1>Lista de contactos</h1>
+            <p>Guarda y organiza la información de tus contactos.</p>
+        </header>
+
+        <section class="contact-form-panel" aria-label="Agregar un contacto">
+            <form id="contact-form">
+                <div class="contact-fields">
+                    <label>
+                        Nombre
+                        <input name="firstName" type="text" placeholder="Escribe el nombre" maxlength="60" autocomplete="given-name" required>
+                    </label>
+                    <label>
+                        Apellido
+                        <input name="lastName" type="text" placeholder="Escribe el apellido" maxlength="60" autocomplete="family-name" required>
+                    </label>
+                    <label>
+                        Teléfono
+                        <input name="phone" type="tel" placeholder="Escribe el teléfono" maxlength="25" autocomplete="tel" required>
+                    </label>
+                    <label>
+                        Ciudad
+                        <input name="city" type="text" placeholder="Escribe la ciudad" maxlength="80" autocomplete="address-level2" required>
+                    </label>
+                    <label class="address-field">
+                        Dirección
+                        <input name="address" type="text" placeholder="Escribe la dirección" maxlength="120" autocomplete="street-address" required>
+                    </label>
+                </div>
+
+                <fieldset class="gender-field">
+                    <legend>Género</legend>
+                    <label><input type="radio" name="gender" value="femenino" required> Femenino</label>
+                    <label><input type="radio" name="gender" value="masculino"> Masculino</label>
+                    <label><input type="radio" name="gender" value="otro"> Otro</label>
+                </fieldset>
+
+                <button class="save-contact-button" id="save-contact-button" type="submit">Guardar contacto</button>
+                <button class="cancel-edit-button" id="cancel-edit-button" type="button" hidden>Cancelar edición</button>
+                <p class="contact-message" id="contact-message" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <section class="saved-contacts" aria-labelledby="saved-contacts-title">
+            <div class="contacts-heading">
+                <h2 id="saved-contacts-title">Contactos guardados</h2>
+                <span id="contact-count" aria-live="polite">0 contactos</span>
+            </div>
+            <ul id="contact-list" class="contact-list" aria-label="Contactos guardados"></ul>
+        </section>
+    </main>
+</body>
+</html>
