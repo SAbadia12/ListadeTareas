@@ -28,7 +28,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
     font: inherit;
 }
 
@@ -318,6 +319,44 @@ h2 {
     border-bottom-color: var(--blue);
 }
 
+.steps-field {
+    display: block;
+    padding: 11px 7px 0;
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.steps-field > span > span {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.steps-field textarea {
+    display: block;
+    width: 100%;
+    min-height: 65px;
+    margin-top: 7px;
+    padding: 8px 10px;
+    resize: vertical;
+    color: var(--ink);
+    background: white;
+    border: 1px solid #e6eaf2;
+    border-radius: 9px;
+    outline: none;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.steps-field textarea::placeholder {
+    color: #9ba4b5;
+}
+
+.steps-field textarea:focus {
+    border-color: var(--blue);
+}
+
 .form-bottom {
     justify-content: space-between;
     gap: 10px;
@@ -380,7 +419,8 @@ h2 {
 }
 
 .add-button:focus-visible,
-.task-checkbox:focus-visible {
+.task-checkbox:focus-visible,
+.step-item input:focus-visible {
     outline: 3px solid rgba(82, 111, 242, 0.35);
     outline-offset: 3px;
 }
@@ -491,6 +531,49 @@ h2 {
     margin-top: 4px;
     color: var(--muted);
     font-size: 10px;
+}
+
+.step-summary {
+    display: block;
+    margin-top: 8px;
+    color: var(--blue-dark);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.step-list {
+    display: grid;
+    gap: 5px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    color: #53628a;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.step-item input {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    margin: 1px 0 0;
+    accent-color: var(--blue);
+    cursor: pointer;
+}
+
+.step-item span {
+    overflow-wrap: anywhere;
+}
+
+.step-item.is-complete span {
+    color: #9aa3b3;
+    text-decoration: line-through;
 }
 
 .task-status {

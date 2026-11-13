@@ -1,5 +1,6 @@
 const taskForm = document.getElementById('task-form')
 const titleInput = document.getElementById('todo-title')
+const stepsInput = document.getElementById('todo-steps')
 const datePicker = document.getElementById('date-picker')
 const todoList = document.getElementById('todo-list')
 const emptyState = document.getElementById('empty-state')
@@ -66,19 +67,72 @@ function createTaskElement(todo) {
         content.append(title)
     }
 
-    if (todo.completed) {
-        item.classList.add('is-complete')
+    const stepCheckboxes = []
+    if (todo.steps.length > 0) {
+        const stepList = document.createElement('ul')
+        const completedSteps = todo.steps.filter((step) => step.completed).length
+        const stepSummary = document.createElement('span')
+
+        stepList.className = 'step-list'
+        stepSummary.className = 'step-summary'
+        stepSummary.textContent = `${completedSteps} de ${todo.steps.length} pasos`
+        content.append(stepSummary)
+
+        todo.steps.forEach((step, index) => {
+            const stepItem = document.createElement('li')
+            const stepCheckbox = document.createElement('input')
+            const stepTitle = document.createElement('span')
+
+            stepItem.className = 'step-item'
+            stepCheckbox.type = 'checkbox'
+            stepCheckbox.checked = step.completed
+            stepCheckbox.setAttribute('aria-label', `Marcar paso: ${step.title}`)
+            stepTitle.textContent = step.title
+
+            if (step.completed) {
+                stepItem.classList.add('is-complete')
+            }
+
+            stepCheckbox.addEventListener('change', () => {
+                todo.steps[index].completed = stepCheckbox.checked
+                todo.completed = todo.steps.every((taskStep) => taskStep.completed)
+                stepItem.classList.toggle('is-complete', step.completed)
+                stepSummary.textContent = `${todo.steps.filter((taskStep) => taskStep.completed).length} de ${todo.steps.length} pasos`
+                updateTaskCompletion(todo, item, checkbox, status, stepCheckboxes)
+                updateSummary()
+            })
+
+            stepCheckboxes.push({ checkbox: stepCheckbox, stepItem, step })
+            stepItem.append(stepCheckbox, stepTitle)
+            stepList.append(stepItem)
+        })
+
+        content.append(stepList)
     }
 
     checkbox.addEventListener('change', () => {
         todo.completed = checkbox.checked
-        item.classList.toggle('is-complete', todo.completed)
-        status.textContent = todo.completed ? 'Completada' : 'Pendiente'
+        todo.steps.forEach((step) => {
+            step.completed = todo.completed
+        })
+        updateTaskCompletion(todo, item, checkbox, status, stepCheckboxes)
         updateSummary()
     })
 
     item.append(checkbox, content, status)
+    updateTaskCompletion(todo, item, checkbox, status, stepCheckboxes)
     return item
+}
+
+function updateTaskCompletion(todo, item, checkbox, status, stepCheckboxes) {
+    checkbox.checked = todo.completed
+    item.classList.toggle('is-complete', todo.completed)
+    status.textContent = todo.completed ? 'Completada' : 'Pendiente'
+
+    stepCheckboxes.forEach(({ checkbox: stepCheckbox, stepItem, step }) => {
+        stepCheckbox.checked = step.completed
+        stepItem.classList.toggle('is-complete', step.completed)
+    })
 }
 
 function renderTasks() {
@@ -99,6 +153,11 @@ taskForm.addEventListener('submit', (event) => {
     event.preventDefault()
 
     const title = titleInput.value.trim()
+    const steps = stepsInput.value
+        .split(/\r?\n/)
+        .map((step) => step.trim())
+        .filter((step) => step.length > 0)
+
     if (!title) {
         formMessage.textContent = 'Escribe el nombre de la tarea para agregarla.'
         titleInput.focus()
@@ -108,7 +167,11 @@ taskForm.addEventListener('submit', (event) => {
     todos.push({
         title,
         dueDate: datePicker.value,
-        completed: false
+        completed: false,
+        steps: steps.map((step) => ({
+            title: step,
+            completed: false
+        }))
     })
 
     formMessage.textContent = ''
