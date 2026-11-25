@@ -1,26 +1,89 @@
-# Sebastián Andrés Abadía Sánchez
-# Juan Sebastián Almendra Pechene
+# Mi semana: tareas, contactos y API REST
 
-# Mi semana — Lista de tareas
+Aplicación web para organizar tareas y contactos. Las dos listas usan una API creada con Node.js y Express; la información se conserva en `data/store.json` y permanece después de reiniciar el servidor.
 
-Aplicación web sencilla para organizar pendientes. Permite agregar, editar y eliminar tareas con fecha límite opcional, desglosarlas en pasos y marcar las tareas y sus pasos como completados.
+## Requisitos
 
-También incluye una lista de contactos independiente, accesible desde **Lista de contactos**. Guarda nombre, apellido, teléfono, ciudad, dirección y género; permite editar o eliminar contactos y los conserva en el navegador.
+- Node.js 18 o posterior.
+- npm.
 
-## Cómo usar
+## Ejecutar
 
-Abre `tareas/index.html` en un navegador. Escribe una tarea, agrega una fecha si la necesitas y, opcionalmente, escribe sus pasos en el campo **Pasos**, uno por línea. Pulsa **Agregar tarea**. Usa **Editar** para cambiar el nombre, la fecha o los pasos de una tarea, o **Eliminar** y confirma para quitarla de la lista. Puedes marcar cada paso por separado; cuando todos estén completados, la tarea principal también se marcará como completada. Al marcar la tarea principal, todos sus pasos se marcarán a la vez.
+Desde la carpeta del proyecto, instala las dependencias e inicia el servidor:
 
-## Archivos
+```bash
+# Windows PowerShell
+npm.cmd install
+npm.cmd start
 
-- `tareas/index.html`: página de la lista de tareas.
-- `tareas/css/styles.css`: estilos y diseño adaptable a celular y escritorio.
-- `tareas/js/script.js`: creación, edición y eliminación de tareas y pasos, marcado de completado y actualización del progreso.
-- `tareas/img/img.png`: imagen incluida en el panel de inspiración.
-- `contactos/index.html`: formulario y lista de contactos.
-- `contactos/css/styles.css`: estilos de la lista de contactos.
-- `contactos/js/contactos.js`: funciones de contactos y almacenamiento local.
+# macOS/Linux (o Símbolo del sistema de Windows)
+npm install
+npm start
+```
 
-Las tareas se mantienen mientras la página está abierta; al recargar el navegador, la lista vuelve a iniciar vacía.
+Abre <http://localhost:3000> para ver el menú de inicio y elegir entre tareas y contactos. También puedes abrir directamente <http://localhost:3000/tareas/> o <http://localhost:3000/contactos/>. Mantén la terminal abierta mientras usas la aplicación. En desarrollo también puedes iniciar con `npm.cmd run dev` en PowerShell o `npm run dev` en macOS/Linux; el servidor se reinicia cuando cambian sus archivos.
 
-- Rediseño y estructuración del código con apoyo de Copilot SDK en VS Code, nuestro asistente de inteligencia artificial.
+No abras los archivos HTML directamente: la interfaz necesita el servidor para comunicarse con la API. El archivo `data/store.json` se crea automáticamente y está excluido de Git para no publicar los datos personales guardados.
+
+## API
+
+Todas las respuestas y solicitudes de datos usan JSON. `GET /api` muestra las rutas disponibles.
+
+| Método | Ruta | Acción |
+| --- | --- | --- |
+| GET | `/api/tasks` | Listar tareas |
+| POST | `/api/tasks` | Crear tarea |
+| PUT | `/api/tasks/:id` | Reemplazar una tarea |
+| DELETE | `/api/tasks/:id` | Eliminar tarea |
+| GET | `/api/contacts` | Listar contactos |
+| POST | `/api/contacts` | Crear contacto |
+| PUT | `/api/contacts/:id` | Reemplazar un contacto |
+| DELETE | `/api/contacts/:id` | Eliminar contacto |
+
+Ejemplo de tarea para `POST /api/tasks` y `PUT /api/tasks/:id`:
+
+```json
+{
+  "title": "Preparar la entrega",
+  "dueDate": "2026-11-25",
+  "completed": false,
+  "steps": [
+    { "title": "Revisar los requisitos", "completed": false }
+  ]
+}
+```
+
+Ejemplo de contacto para `POST /api/contacts` y `PUT /api/contacts/:id`:
+
+```json
+{
+  "firstName": "Ana",
+  "lastName": "Pérez",
+  "phone": "3001234567",
+  "city": "Cali",
+  "address": "Calle 1 # 2-3",
+  "gender": "femenino"
+}
+```
+
+Los identificadores los genera el servidor. Las rutas de creación responden con `201`, las de consulta y actualización con `200`, las de eliminación con `204`; los datos inválidos reciben `400` y los identificadores inexistentes `404`.
+
+## Estructura
+
+- `src/server.js`: servidor Express, validación, persistencia y rutas de la API.
+- `inicio/`: menú inicial con accesos a tareas y contactos.
+- `tareas/`: interfaz y cliente de la lista de tareas.
+- `contactos/`: interfaz y cliente de la lista de contactos.
+- `data/store.json`: almacenamiento local creado al iniciar el servidor; no se versiona.
+
+## Aprendizajes
+
+- Express permite definir rutas REST con los verbos HTTP `GET`, `POST`, `PUT` y `DELETE`.
+- `express.json()` convierte el cuerpo JSON de una petición en datos que puede validar el servidor.
+- `fetch` conecta el DOM con la API de forma asíncrona; la interfaz actualiza las listas usando las respuestas del servidor y muestra los errores.
+- Validar los datos en el servidor protege la integridad de las tareas y los contactos, aunque el cliente también valide sus formularios.
+- Guardar los datos en un archivo JSON permite conservarlos entre reinicios sin configurar una base de datos. Para una aplicación multiusuario o de producción convendría usar una base de datos.
+
+## Uso de inteligencia artificial
+
+Se utilizó GitHub Copilot en VS Code como apoyo para revisar la estructura existente, integrar la API con las interfaces y redactar esta documentación. Las decisiones de implementación se verificaron ejecutando la aplicación y probando las rutas HTTP de tareas y contactos.
