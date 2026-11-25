@@ -8,7 +8,35 @@ const taskCount = document.getElementById('task-count')
 const progressText = document.getElementById('progress-text')
 const taskProgress = document.getElementById('task-progress')
 const formMessage = document.getElementById('form-message')
-const todos = []
+let todos = []
+
+async function requestApi(path, options = {}) {
+    let response
+    try {
+        response = await fetch(path, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        })
+    } catch (error) {
+        console.error('No se pudo conectar con la API de tareas.', error)
+        throw new Error('No se pudo conectar con la API. En PowerShell ejecuta "npm.cmd start" en la carpeta del proyecto y abre http://localhost:3000.')
+    }
+
+    if (!response.headers.get('content-type')?.includes('application/json')) {
+        throw new Error('La página recibió HTML en vez de la API. En PowerShell ejecuta "npm.cmd start" en la carpeta del proyecto y abre http://localhost:3000 (no uses Live Server).')
+    }
+
+    const result = response.status === 204 ? null : await response.json()
+
+    if (!response.ok) {
+        throw new Error(result.error || 'No se pudo completar la solicitud.')
+    }
+
+    return result
+}
 
 function showToday() {
     const today = new Date()
@@ -48,6 +76,22 @@ function createActionButton(label, className, action) {
     return button
 }
 
+function focusTaskEditButton(id) {
+    const button = [...todoList.querySelectorAll('.task-edit-button')]
+        .find((editButton) => editButton.closest('.task-row').dataset.taskId === id)
+    button?.focus()
+}
+
+async function updateTask(updatedTask) {
+    const savedTask = await requestApi(`/api/tasks/${encodeURIComponent(updatedTask.id)}`, {
+        method: 'PUT',
+        body: JSON.stringify(updatedTask)
+    })
+    todos = todos.map((todo) => todo.id === savedTask.id ? savedTask : todo)
+    renderTasks()
+    return savedTask
+}
+
 function createTaskEditor(todo, item) {
     const form = document.createElement('form')
     const titleLabel = document.createElement('label')
@@ -83,12 +127,12 @@ function createTaskEditor(todo, item) {
         createActionButton('Guardar', 'task-action task-save-button', () => form.requestSubmit()),
         createActionButton('Cancelar', 'task-action', () => {
             renderTasks()
-            todoList.querySelector(`[data-task-index="${todos.indexOf(todo)}"] .task-edit-button`)?.focus()
+            focusTaskEditButton(todo.id)
         })
     )
 
     form.append(titleLabel, stepsLabel, dateLabel, buttons)
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
         event.preventDefault()
 
         const title = titleInput.value.trim()
@@ -108,20 +152,48 @@ function createTaskEditor(todo, item) {
                 return { title: stepTitle, completed: previousStep?.completed ?? false }
             })
 
-        todo.title = title
-        todo.dueDate = dateInput.value
-        todo.steps = updatedSteps
+        const updatedTask = {
+            ...todo,
+            title,
+            dueDate: dateInput.value,
+            steps: updatedSteps
+        }
         if (updatedSteps.length > 0) {
-            todo.completed = updatedSteps.every((step) => step.completed)
+            updatedTask.completed = updatedSteps.every((step) => step.completed)
         }
 
-        renderTasks()
-        const taskIndex = todos.indexOf(todo)
-        todoList.querySelector(`[data-task-index="${taskIndex}"] .task-edit-button`)?.focus()
+        try {
+            await updateTask(updatedTask)
+            focusTaskEditButton(todo.id)
+            formMessage.textContent = ''
+        } catch (error) {
+            formMessage.textContent = error.message
+        }
     })
 
     item.querySelector('.task-content').replaceChildren(form)
     titleInput.focus()
+}
+
+async function deleteTask(todo, taskIndex) {
+    if (!window.confirm(`¿Eliminar la tarea "${todo.title}"?`)) {
+        return
+    }
+
+    try {
+        await requestApi(`/api/tasks/${encodeURIComponent(todo.id)}`, { method: 'DELETE' })
+        todos = todos.filter((savedTask) => savedTask.id !== todo.id)
+        renderTasks()
+        const nextTask = todoList.querySelector(`[data-task-index="${Math.min(taskIndex, todos.length - 1)}"] .task-edit-button`)
+        if (nextTask) {
+            nextTask.focus()
+        } else {
+            titleInput.focus()
+        }
+        formMessage.textContent = ''
+    } catch (error) {
+        formMessage.textContent = error.message
+    }
 }
 
 function createTaskElement(todo) {
@@ -130,11 +202,12 @@ function createTaskElement(todo) {
     const content = document.createElement('div')
     const title = document.createElement('span')
     const status = document.createElement('span')
-
     const taskIndex = todos.indexOf(todo)
     const actions = document.createElement('div')
+
     item.className = 'task-row'
     item.dataset.taskIndex = taskIndex
+    item.dataset.taskId = todo.id
     checkbox.className = 'task-checkbox'
     checkbox.type = 'checkbox'
     checkbox.checked = todo.completed
@@ -142,18 +215,7 @@ function createTaskElement(todo) {
     actions.className = 'task-actions'
     actions.append(
         createActionButton('Editar', 'task-action task-edit-button', () => createTaskEditor(todo, item)),
-        createActionButton('Eliminar', 'task-action task-delete-button', () => {
-            if (window.confirm(`¿Eliminar la tarea "${todo.title}"?`)) {
-                todos.splice(todos.indexOf(todo), 1)
-                renderTasks()
-                const nextTask = todoList.querySelector(`[data-task-index="${Math.min(taskIndex, todos.length - 1)}"] .task-edit-button`)
-                if (nextTask) {
-                    nextTask.focus()
-                } else {
-                    titleInput.focus()
-                }
-            }
-        })
+        createActionButton('Eliminar', 'task-action task-delete-button', () => deleteTask(todo, taskIndex))
     )
 
     content.className = 'task-content'
@@ -197,13 +259,21 @@ function createTaskElement(todo) {
                 stepItem.classList.add('is-complete')
             }
 
-            stepCheckbox.addEventListener('change', () => {
-                todo.steps[index].completed = stepCheckbox.checked
-                todo.completed = todo.steps.every((taskStep) => taskStep.completed)
-                stepItem.classList.toggle('is-complete', step.completed)
-                stepSummary.textContent = `${todo.steps.filter((taskStep) => taskStep.completed).length} de ${todo.steps.length} pasos`
-                updateTaskCompletion(todo, item, checkbox, status, stepCheckboxes)
-                updateSummary()
+            stepCheckbox.addEventListener('change', async () => {
+                const updatedTask = {
+                    ...todo,
+                    steps: todo.steps.map((taskStep, stepIndex) =>
+                        stepIndex === index ? { ...taskStep, completed: stepCheckbox.checked } : taskStep
+                    )
+                }
+                updatedTask.completed = updatedTask.steps.every((taskStep) => taskStep.completed)
+                try {
+                    await updateTask(updatedTask)
+                    formMessage.textContent = ''
+                } catch (error) {
+                    renderTasks()
+                    formMessage.textContent = error.message
+                }
             })
 
             stepCheckboxes.push({ checkbox: stepCheckbox, stepItem, step })
@@ -214,13 +284,19 @@ function createTaskElement(todo) {
         content.append(stepList)
     }
 
-    checkbox.addEventListener('change', () => {
-        todo.completed = checkbox.checked
-        todo.steps.forEach((step) => {
-            step.completed = todo.completed
-        })
-        updateTaskCompletion(todo, item, checkbox, status, stepCheckboxes)
-        updateSummary()
+    checkbox.addEventListener('change', async () => {
+        const updatedTask = {
+            ...todo,
+            completed: checkbox.checked,
+            steps: todo.steps.map((step) => ({ ...step, completed: checkbox.checked }))
+        }
+        try {
+            await updateTask(updatedTask)
+            formMessage.textContent = ''
+        } catch (error) {
+            renderTasks()
+            formMessage.textContent = error.message
+        }
     })
 
     item.append(checkbox, content, status, actions)
@@ -253,7 +329,7 @@ function renderTasks() {
     updateSummary()
 }
 
-taskForm.addEventListener('submit', (event) => {
+taskForm.addEventListener('submit', async (event) => {
     event.preventDefault()
 
     const title = titleInput.value.trim()
@@ -268,25 +344,39 @@ taskForm.addEventListener('submit', (event) => {
         return
     }
 
-    todos.push({
-        title,
-        dueDate: datePicker.value,
-        completed: false,
-        steps: steps.map((step) => ({
-            title: step,
-            completed: false
-        }))
-    })
-
-    formMessage.textContent = ''
-    taskForm.reset()
-    renderTasks()
-    titleInput.focus()
+    try {
+        const task = await requestApi('/api/tasks', {
+            method: 'POST',
+            body: JSON.stringify({
+                title,
+                dueDate: datePicker.value,
+                completed: false,
+                steps: steps.map((step) => ({ title: step, completed: false }))
+            })
+        })
+        todos = [...todos, task]
+        formMessage.textContent = ''
+        taskForm.reset()
+        renderTasks()
+        titleInput.focus()
+    } catch (error) {
+        formMessage.textContent = error.message
+    }
 })
 
 titleInput.addEventListener('input', () => {
     formMessage.textContent = ''
 })
 
+async function loadTasks() {
+    try {
+        todos = await requestApi('/api/tasks')
+        renderTasks()
+    } catch (error) {
+        renderTasks()
+        formMessage.textContent = `No se pudieron cargar las tareas: ${error.message}`
+    }
+}
+
 showToday()
-renderTasks()
+loadTasks()

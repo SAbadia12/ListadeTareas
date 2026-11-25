@@ -4,51 +4,39 @@ const contactCount = document.getElementById('contact-count')
 const contactMessage = document.getElementById('contact-message')
 const saveContactButton = document.getElementById('save-contact-button')
 const cancelEditButton = document.getElementById('cancel-edit-button')
-const contactStorageKey = 'mi-semana-contactos'
 let contacts = []
 let editingContactId = null
 
+async function requestApi(path, options = {}) {
+    let response
+    try {
+        response = await fetch(path, {
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        })
+    } catch (error) {
+        console.error('No se pudo conectar con la API de contactos.', error)
+        throw new Error('No se pudo conectar con la API. En PowerShell ejecuta "npm.cmd start" en la carpeta del proyecto y abre http://localhost:3000.')
+    }
+
+    if (!response.headers.get('content-type')?.includes('application/json')) {
+        throw new Error('La página recibió HTML en vez de la API. En PowerShell ejecuta "npm.cmd start" en la carpeta del proyecto y abre http://localhost:3000 (no uses Live Server).')
+    }
+
+    const result = response.status === 204 ? null : await response.json()
+
+    if (!response.ok) {
+        throw new Error(result.error || 'No se pudo completar la solicitud.')
+    }
+
+    return result
+}
+
 function showContactMessage(message) {
     contactMessage.textContent = message
-}
-
-function persistContacts() {
-    try {
-        localStorage.setItem(contactStorageKey, JSON.stringify(contacts))
-        return true
-    } catch (error) {
-        console.error('No se pudieron guardar los contactos en este navegador.', error)
-        showContactMessage('No se pudieron guardar los cambios en este navegador.')
-        return false
-    }
-}
-
-function loadContacts() {
-    try {
-        const savedContacts = localStorage.getItem(contactStorageKey)
-        if (!savedContacts) {
-            return
-        }
-
-        const parsedContacts = JSON.parse(savedContacts)
-        if (!Array.isArray(parsedContacts)) {
-            throw new Error('El formato guardado de contactos no es válido.')
-        }
-
-        contacts = parsedContacts.filter((contact) =>
-            contact &&
-            typeof contact.id === 'string' &&
-            typeof contact.firstName === 'string' &&
-            typeof contact.lastName === 'string' &&
-            typeof contact.phone === 'string' &&
-            typeof contact.city === 'string' &&
-            typeof contact.address === 'string' &&
-            ['femenino', 'masculino', 'otro'].includes(contact.gender)
-        )
-    } catch (error) {
-        console.error('No se pudieron cargar los contactos guardados.', error)
-        showContactMessage('No se pudieron cargar los contactos guardados.')
-    }
 }
 
 function resetContactForm() {
@@ -136,32 +124,30 @@ function editContact(contact) {
     contactForm.elements.firstName.focus()
 }
 
-function deleteContact(contact) {
+async function deleteContact(contact) {
     if (!window.confirm(`¿Eliminar a ${contact.firstName} ${contact.lastName} de tus contactos?`)) {
         return
     }
 
-    const previousContacts = contacts
-    contacts = contacts.filter((savedContact) => savedContact.id !== contact.id)
-    if (persistContacts()) {
+    try {
+        await requestApi(`/api/contacts/${encodeURIComponent(contact.id)}`, { method: 'DELETE' })
+        contacts = contacts.filter((savedContact) => savedContact.id !== contact.id)
         if (editingContactId === contact.id) {
             resetContactForm()
         }
         renderContacts()
         showContactMessage('Contacto eliminado.')
-    } else {
-        contacts = previousContacts
-        renderContacts()
+    } catch (error) {
+        showContactMessage(error.message)
     }
 }
 
-contactForm.addEventListener('submit', (event) => {
+contactForm.addEventListener('submit', async (event) => {
     event.preventDefault()
 
     const wasEditing = Boolean(editingContactId)
     const formData = new FormData(contactForm)
     const contact = {
-        id: editingContactId || `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         firstName: formData.get('firstName').trim(),
         lastName: formData.get('lastName').trim(),
         phone: formData.get('phone').trim(),
@@ -169,26 +155,40 @@ contactForm.addEventListener('submit', (event) => {
         address: formData.get('address').trim(),
         gender: formData.get('gender')
     }
-    const previousContacts = contacts
 
-    if (editingContactId) {
-        contacts = contacts.map((savedContact) => savedContact.id === editingContactId ? contact : savedContact)
-    } else {
-        contacts = [...contacts, contact]
+    try {
+        const savedContact = await requestApi(
+            wasEditing ? `/api/contacts/${encodeURIComponent(editingContactId)}` : '/api/contacts',
+            {
+                method: wasEditing ? 'PUT' : 'POST',
+                body: JSON.stringify(contact)
+            }
+        )
+        if (wasEditing) {
+            contacts = contacts.map((saved) => saved.id === savedContact.id ? savedContact : saved)
+        } else {
+            contacts = [...contacts, savedContact]
+        }
+
+        renderContacts()
+        resetContactForm()
+        showContactMessage(wasEditing ? 'Cambios guardados.' : 'Contacto guardado.')
+        contactForm.elements.firstName.focus()
+    } catch (error) {
+        showContactMessage(error.message)
     }
-
-    if (!persistContacts()) {
-        contacts = previousContacts
-        return
-    }
-
-    renderContacts()
-    resetContactForm()
-    showContactMessage(wasEditing ? 'Cambios guardados.' : 'Contacto guardado.')
-    contactForm.elements.firstName.focus()
 })
 
 cancelEditButton.addEventListener('click', resetContactForm)
 
+async function loadContacts() {
+    try {
+        contacts = await requestApi('/api/contacts')
+        renderContacts()
+    } catch (error) {
+        renderContacts()
+        showContactMessage(`No se pudieron cargar los contactos: ${error.message}`)
+    }
+}
+
 loadContacts()
-renderContacts()
