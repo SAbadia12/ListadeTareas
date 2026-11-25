@@ -1,3 +1,6 @@
+# Sebastián Andrés Abadía Sánchez
+# Juan Sebastián Almendra Pechene
+
 # Mi semana: tareas, contactos y API REST
 
 Aplicación web para organizar tareas y contactos. Las dos listas usan una API creada con Node.js y Express; la información se conserva en `data/store.json` y permanece después de reiniciar el servidor.
